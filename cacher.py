@@ -3,6 +3,8 @@ from pathlib import Path
 
 class Cacher():
 
+
+
     def __init__(self):
 
         message_cache = "message_cache"
@@ -15,12 +17,12 @@ class Cacher():
 
         self.id_cache_file = os.open(cache_file_path, os.O_CREAT | os.O_RDWR)
 
-    def write(self, string):
+
+
+    def write(self, string: str):
         os.write(self.id_cache_file, string.encode('ASCII'))
+
+
 
     def close(self):
         os.close(self.id_cache_file)
-
-
-cacher = Cacher()
-cacher.write("hello world")
