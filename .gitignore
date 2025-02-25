@@ -1,4 +1,7 @@
+credentials.json
 tokens.py
+googletoken.json
+private/
 message_cache/
 
 # Byte-compiled / optimized / DLL files

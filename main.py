@@ -1,6 +1,6 @@
-from tokens import BOT_TOKEN, DAYS_OF_DEV_CHANNEL_ID
+from private.tokens import BOT_TOKEN, DAYS_OF_DEV_CHANNEL_ID
 from discord import Intents
-from myclient import MyClient
+from discordclient import DiscordClient
 from cacher import Cacher
     
 
@@ -12,7 +12,7 @@ def main():
 
     cacher = Cacher()
 
-    client = MyClient(intents=intents)
+    client = DiscordClient(intents=intents)
     client.pass_dependencies(cacher, DAYS_OF_DEV_CHANNEL_ID)
 
     client.run(BOT_TOKEN)

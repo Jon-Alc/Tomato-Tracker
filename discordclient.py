@@ -1,6 +1,6 @@
 from discord import Client
 
-class MyClient(Client):
+class DiscordClient(Client):
 
 
 
