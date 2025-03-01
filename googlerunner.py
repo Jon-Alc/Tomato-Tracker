@@ -6,7 +6,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from private.tokens import GOOGLE_SHEET_ID, GOOGLE_CREDENTIALS_PATH
+from private.tokens import GOOGLE_SHEET_ID, GOOGLE_CREDENTIALS_PATH, GOOGLE_SHEET_NAME
 
 """
 references:
@@ -17,15 +17,19 @@ read and write - https://developers.google.com/sheets/api/guides/values#python
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
+
+
 class GoogleRunner():
   
 
+
     def __init__(self):
 
-        self.creds = self._get_creds()
+        self.sheet = self._initialize()
 
     
-    def _get_creds(self):
+
+    def _initialize(self):
 
         creds = None
         google_token_path = "private/googletoken.json"
@@ -50,23 +54,29 @@ class GoogleRunner():
             with open(google_token_path, "w") as token:
                     token.write(creds.to_json())
 
-        return creds
+        service = build("sheets", "v4", credentials=creds)
+
+        # Call the Sheets API
+        sheet = service.spreadsheets()
+
+        return sheet
+
 
 
     def update_sheet(self, sheet_range: str, value_input_option, sheet_values: list):
         
-        update_range = f"Sheet1!{sheet_range}"
+        update_range = f"{GOOGLE_SHEET_NAME}!{sheet_range}"
         body = {"values": sheet_values}
 
         try:
-            service = build("sheets", "v4", credentials=self.creds)
             
             result = (
-                service.spreadsheets().values()
+                self.sheet.values()
                 .update(
                     spreadsheetId=GOOGLE_SHEET_ID,
                     valueInputOption=value_input_option,
                     range=update_range,
+                    includeValuesInResponse=True, # don't delete cells in case of disaster
                     body=body,
                 )
                 .execute()
@@ -75,6 +85,30 @@ class GoogleRunner():
             print(f"{result.get('updatedCells')} cells updated.")
             return result
 
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return error
+        
+
+
+    def get_last_entry_row_number(self):
+
+        cell_range = f"{GOOGLE_SHEET_NAME}!B1"
+
+        try:
+            result = (
+                self.sheet.values()
+                .get(spreadsheetId=GOOGLE_SHEET_ID, range=cell_range)
+                .execute()
+            )
+            values = result.get("values")
+
+            if values:
+                # values = [['3']], return only the number as an int
+                return int(values[0][0])
+            
+            return None
+            
         except HttpError as error:
             print(f"An error occurred: {error}")
             return error

@@ -25,15 +25,33 @@ class Main():
 
     async def on_discord_connected(self, client: DiscordClient):
 
-        messages = await client.get_messages()
-        await client.close()
+        runner = GoogleRunner()
+        next_row = runner.get_last_entry_row_number() + 1
 
-        log_messages = await self.parse_messages(messages)
+        if not next_row:
+            next_row = 3
 
-        for message in log_messages:
-            print(message)
+        # messages = await client.get_messages()
+        # await client.close()
 
-        # runner = GoogleRunner()
+        # log_messages = await self.parse_messages(messages)
+
+        # for message in log_messages:
+        #     print(message)
+
+        # update_range = f"A{next_row}:F{len(log_messages)}"
+        update_range = f"A{next_row}:F{next_row}"
+
+        runner.update_sheet(
+            update_range,
+            "USER_ENTERED",
+            [["1", "2", None, "4", "5", "6"]],
+        )
+
+        # use batch update
+        # update the last-entry cell
+
+
         # runner.update_sheet(
         #     "A1:C2",
         #     "USER_ENTERED",
