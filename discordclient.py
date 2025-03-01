@@ -1,12 +1,14 @@
 from discord import Client
+from discord.ext import tasks
 
 class DiscordClient(Client):
 
 
 
-    def pass_dependencies(self, cacher, channel_id):
+    def pass_dependencies(self, cacher, channel_id, main_instance):
         self.cacher = cacher
         self.channel_id = channel_id
+        self.main = main_instance
 
 
 
@@ -16,12 +18,24 @@ class DiscordClient(Client):
             raise AttributeError("Cacher not found: run pass_dependencies() first")
 
         print(f"Logged on as {self.user}!")
+
+        # run() is blocking; return execution to main()
+        await self.main.on_discord_connected(self)
+        return
+
+    
+    
+    async def get_messages(self):
+
         self.dev_log_channel = self.get_channel(self.channel_id)
         print(f"Accessed {self.dev_log_channel}, getting posts...")
-        await self._get_channel_posts()
-        
+        messages = await self._get_channel_posts()
+        await self.close()
+        print(messages)
+        return messages
 
-        
+
+
     async def _get_channel_posts(self):
 
         """
@@ -34,11 +48,21 @@ class DiscordClient(Client):
         5: the spreadsheet will update itself
         """
 
+        messages = [message async for message in self.dev_log_channel.history(limit=10, oldest_first=True)]
+        return messages
         # 1: get latest post id; this will be how we know we stopped
-        latest_post_id = self.dev_log_channel.last_message_id
-        print(latest_post_id)
+        # latest_post_id = self.dev_log_channel.last_message_id
+        # print(latest_post_id)
 
         # print(len([message async for message in self.dev_log_channel.history(limit=50, oldest_first=True)]))
         # messages = [message async for message in self.dev_log_channel.history()]
         # for i in range(len(messages)):
         #     self.cacher.write(f"{str(messages[i].id)}\n")
+
+    
+
+    async def close(self):
+        print("Logging off Discord...")
+        await Client.close(self)
+        print("Terminated connection to Discord!")
+        return
