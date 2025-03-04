@@ -30,8 +30,6 @@ class DiscordClient(Client):
         self.dev_log_channel = self.get_channel(self.channel_id)
         print(f"Accessed {self.dev_log_channel}, getting posts...")
         messages = await self._get_channel_posts()
-        await self.close()
-        print(messages)
         return messages
 
 

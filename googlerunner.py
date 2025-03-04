@@ -91,6 +91,34 @@ class GoogleRunner():
         
 
 
+    def batch_update_sheet(self, sheet_range: str, value_input_option, sheet_values: list):
+        
+        update_range = f"{GOOGLE_SHEET_NAME}!{sheet_range}"
+        body = {"values": sheet_values}
+
+        try:
+            
+            result = (
+                self.sheet.values()
+                .batchUpdate(
+                    spreadsheetId=GOOGLE_SHEET_ID,
+                    valueInputOption=value_input_option,
+                    range=update_range,
+                    includeValuesInResponse=True, # don't delete cells in case of disaster
+                    body=body,
+                )
+                .execute()
+            )
+
+            print(f"{result.get('updatedCells')} cells updated.")
+            return result
+
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return error
+
+
+
     def get_last_entry_row_number(self):
 
         cell_range = f"{GOOGLE_SHEET_NAME}!B1"
