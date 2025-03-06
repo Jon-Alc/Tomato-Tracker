@@ -43,25 +43,36 @@ class Main():
     def continue_execution(self, messages):
 
         runner = GoogleRunner()
-        next_row = runner.get_last_entry_row_number() + 1
 
-        if not next_row:
+        last_entry_row_number = runner.get_last_entry_row_number()
+
+        next_row = 0;
+        if not last_entry_row_number:
             next_row = 3
+        else:
+            next_row = last_entry_row_number + 1
 
+        
         log_messages = self.parse_messages(messages)
 
-        update_range = f"A{next_row}:H{next_row + len(log_messages)}"
+        last_row = next_row + len(log_messages) - 1
+        update_range = f"A{next_row}:E{last_row}"
 
         entries = []
 
         for message in log_messages:
             entries.append(message.to_google_sheet_list())
             
+        if not entries:
+            print("No new posts.")
+            return
+
         runner.update_sheet(
             update_range,
-            "USER_ENTERED",
             entries
         )
+
+        runner.update_last_entry_row_number(last_row)
 
         # update the last-entry cell
         # reverse history() so that you get latest messages 50 at a time, then stop when an id has been found
@@ -69,7 +80,6 @@ class Main():
 
         # runner.update_sheet(
         #     "A1:C2",
-        #     "USER_ENTERED",
         #     [["A", "B"], ["C", "D"]],
         # )
 
@@ -78,7 +88,6 @@ class Main():
 
         # runner.update_sheet(
         #     update_range,
-        #     "USER_ENTERED",
         #     [["1", "2", None, "4", "5", "6"]],
         # )
 
@@ -94,13 +103,13 @@ class Main():
 
             message_content = message.content
             day_match = re.search("^Day [0-9]+,", message_content)
+            duration_match = re.search("Total time: [0-9]+ minutes", message_content)
+            streak_match = re.search("Streak: [0-9]+", message_content)
 
-            if day_match:
+            if day_match and duration_match and streak_match:
                 
                 session_indices = day_match.span()
-                duration_match = re.search("Total time: [0-9]+ minutes", message_content)
                 duration_indices = duration_match.span()
-                streak_match = re.search("Streak: [0-9]+", message_content)
                 streak_indices = streak_match.span()
 
                 message_id = message.id

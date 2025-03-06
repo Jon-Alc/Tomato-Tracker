@@ -22,4 +22,4 @@ class LogEntry():
         return [self.id, self.session, self.url, self.date, self.duration, self.streak]
     
     def to_google_sheet_list(self):
-        return [self.date, self.session, self.streak, self.duration, None, None, None, f'=HYPERLINK("{self.url}", "Link")']
+        return [self.date, self.session, self.streak, self.duration, f'=HYPERLINK("{self.url}", "Link")']
