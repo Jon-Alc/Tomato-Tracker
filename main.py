@@ -56,7 +56,7 @@ class Main():
         log_messages = self.parse_messages(messages)
 
         last_row = next_row + len(log_messages) - 1
-        update_range = f"A{next_row}:E{last_row}"
+        update_range = f"B{next_row}:E{last_row}"
 
         entries = []
 
@@ -102,24 +102,33 @@ class Main():
         for message in messages:
 
             message_content = message.content
-            day_match = re.search("^Day [0-9]+,", message_content)
+            old_day_match = re.search("^Day [0-9]+,", message_content) # ex: Day 269
+            new_day_match = re.search("^Day done", message_content) # ex: Day done
             duration_match = re.search("Total time: [0-9]+ minutes", message_content)
-            streak_match = re.search("Streak: [0-9]+", message_content)
+            old_streak_match = re.search("Streak: [0-9]+", message_content) # ex: Streak: 7
+            streak_broken_match = re.search("Streak broken", message_content) # ex: Streak broken
 
-            if day_match and duration_match and streak_match:
+            if (old_day_match or new_day_match) and duration_match and (old_streak_match or streak_broken_match):
                 
-                session_indices = day_match.span()
+                session_indices = None
+                if old_day_match:
+                    session_indices = old_day_match.span()
+
                 duration_indices = duration_match.span()
-                streak_indices = streak_match.span()
+
+                streak_continues = not streak_broken_match
+                if old_streak_match:
+                    streak_indices = old_streak_match.span()
+                    if message_content[streak_indices[0] + 8 : streak_indices[1]] == "1":
+                        streak_continues = False
 
                 message_id = message.id
                 message_session = message_content[session_indices[0] + 4 : session_indices[1] - 1]
                 message_url = message.jump_url
                 message_date = message.created_at.strftime("%d %b %Y, %I:%M:%S%p")
                 log_duration = message_content[duration_indices[0] + 12 : duration_indices[1] - 8]
-                log_streak = message_content[streak_indices[0] + 8 : streak_indices[1]]
 
-                log_entries.append(LogEntry(message_id, message_session, message_url, message_date, log_duration, log_streak))
+                log_entries.append(LogEntry(message_id, message_session, message_url, message_date, log_duration, streak_continues))
 
         return log_entries
 
