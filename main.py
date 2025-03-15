@@ -62,6 +62,8 @@ class Main():
 
         for message in log_messages:
             entries.append(message.to_google_sheet_list())
+        
+        print(entries)
             
         if not entries:
             print("No new posts.")
