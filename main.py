@@ -112,9 +112,6 @@ class Main():
 
             if (old_day_match or new_day_match) and duration_match and (old_streak_match or streak_broken_match):
                 
-                session_indices = None
-                if old_day_match:
-                    session_indices = old_day_match.span()
 
                 duration_indices = duration_match.span()
 
@@ -125,7 +122,13 @@ class Main():
                         streak_continues = False
 
                 message_id = message.id
-                message_session = message_content[session_indices[0] + 4 : session_indices[1] - 1]
+
+                session_indices = None
+                message_session = None
+                if old_day_match:
+                    session_indices = old_day_match.span()
+                    message_session = message_content[session_indices[0] + 4 : session_indices[1] - 1]
+
                 message_url = message.jump_url
                 message_date = message.created_at.strftime("%d %b %Y, %I:%M:%S%p")
                 log_duration = message_content[duration_indices[0] + 12 : duration_indices[1] - 8]

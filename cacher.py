@@ -43,7 +43,7 @@ class Cacher():
         try:
             append_file = open(self.filepath, "a")
 
-            id_string = "\n".join(id_list)
+            id_string = "\n" + "\n".join(id_list)
             append_file.write(id_string)
 
             append_file.close()
