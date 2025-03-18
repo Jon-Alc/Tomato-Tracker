@@ -110,7 +110,7 @@ class Main():
             old_streak_match = re.search("Streak: [0-9]+", message_content) # ex: Streak: 7
             streak_broken_match = re.search("Streak broken", message_content) # ex: Streak broken
 
-            if (old_day_match or new_day_match) and duration_match and (old_streak_match or streak_broken_match):
+            if (old_day_match or new_day_match) and duration_match:
                 
 
                 duration_indices = duration_match.span()
